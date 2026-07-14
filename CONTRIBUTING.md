@@ -25,6 +25,57 @@ a part of it or changes it first.
   and HTTP statuses are defined only in `drakkar-core::error::mapping`; a status literal
   anywhere else fails the single-mapping-site test.
 
+## Spec-first workflow
+
+Code follows the corpus, never the other way around.
+
+1. **Find or open the issue.** Every PR closes a GitHub issue, and every issue
+   cites the spec section or RFC it implements. Work with no spec basis needs a
+   spec/RFC PR first.
+2. **Change the spec before the code when the contract moves.** New subsystems,
+   algorithms whose correctness is not obvious from the type signature,
+   cross-cutting concerns, external boundaries, or any choice a reasonable
+   engineer would make differently require a **new RFC** — copy
+   [`docs/rfcs/RFC-TEMPLATE.md`](docs/rfcs/RFC-TEMPLATE.md), which matches the
+   shipped RFC structure (Status, Authors, Created, Target milestone, Summary,
+   Motivation, Goals, Non-Goals, Proposed Design, Alternatives Considered,
+   Drawbacks, Migration/Rollout, Testing Strategy, Open Questions, References).
+   An accepted RFC is *superseded, never edited into a different decision*
+   ([SPEC.md](SPEC.md#change-process)).
+3. **Mint requirement IDs.** Each spec document and RFC assigns per-document IDs
+   to its load-bearing statements (`A1–A12` in RFC-0001, `FE1–FE27` in RFC-0004,
+   `KV1–KV24` in RFC-0005, …; spec sections mint `API-`/`DM-`/`SEC-`/… prefixes
+   for contracts not already carried by an RFC). Use RFC 2119 keywords (MUST,
+   SHOULD, MAY). Locked decisions are cited as `LDn`
+   ([decision log](docs/spec/11-decision-log.md)).
+4. **Cite the IDs from the implementation.** The PR body and, where useful, the
+   commit message and code comments reference the requirement IDs the change
+   satisfies, so a reviewer can trace intent → contract → code.
+
+## The review gate: invariants I1–I5
+
+Every PR is reviewed against the five architecture invariants
+([docs/spec/01-architecture.md §10](docs/spec/01-architecture.md#10-invariants-the-review-contract)).
+A PR that weakens one is rejected unless it amends RFC-0001 first and says so:
+
+- **I1** — one engine thread per model; all GPU state confined to it.
+- **I2** — the memory contract: `weights + kv_pool + activation_watermark +
+  runtime_overhead <= declared_budget` at all times.
+- **I3** — single source of memory math: sizing formulas live only in
+  `drakkar-fit`.
+- **I4** — every user-facing surface (CLI, HTTP) has a versioned JSON
+  representation.
+- **I5** — the backend seam is the only portability boundary; nothing above it
+  names Metal, MLX, or llama.cpp types (enforced by the `cargo deny check bans`
+  seam-deps gate and the `cargo public-api` diff).
+
+## Changelog discipline
+
+Every user-visible change lands with its own `[Unreleased]` entry in
+`CHANGELOG.md` in the same PR (RV30,
+[docs/spec/09-release-and-versioning.md §7](docs/spec/09-release-and-versioning.md)).
+CI fails a PR that carries a user-facing area label without a changelog entry.
+
 ## Development setup
 
 - Apple Silicon Mac, macOS 15+ (macOS 26.2+ to exercise the Neural Accelerator paths).
