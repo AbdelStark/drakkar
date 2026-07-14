@@ -22,6 +22,7 @@ mod machine;
 pub mod memory;
 mod model;
 mod request;
+pub mod verdict;
 
 pub use machine::MachineProfile;
 pub use model::{ModelDescriptor, TensorEntry};
@@ -33,7 +34,7 @@ pub use drakkar_core::FitReport;
 
 use drakkar_core::{
     Confidence, Estimate, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel, FitPerformance,
-    TtftEstimate, Verdict,
+    TtftEstimate,
 };
 
 /// The FE24 confidence tier printed with every prediction. An alias for
@@ -65,7 +66,19 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
         request.kv_bits,
     );
     let kv_per_token = memory::kv_bytes_per_token(model, request.kv_bits, memory::KV_GROUP_DEFAULT);
+    let usable = memory::usable(machine, memory::RUNTIME_OVERHEAD_BYTES);
     let headroom_gib = (machine.budget_bytes as f64 - mem.total as f64) / memory::BYTES_PER_GIB;
+    // Floor plan (FE19): 4k context, 8-bit KV — used to separate Needs-tuning
+    // from Won't-fit.
+    let floor = memory::total(model, 4096, 1, 8);
+    let outcome = verdict::assess(
+        mem.total,
+        usable.bytes,
+        floor.total,
+        &model.reference,
+        machine,
+        None,
+    );
     FitReport {
         schema: FIT_SCHEMA,
         model: FitModel {
@@ -93,8 +106,7 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
             total_gib: mem.total as f64 / memory::BYTES_PER_GIB,
             confidence: Confidence::Modeled,
         },
-        // Placeholder — the verdict tiers and remedies (#230) fill these.
-        verdict: Verdict::WontFit,
+        verdict: outcome.verdict,
         headroom_gib,
         context: FitContext {
             requested: request.target_ctx,
@@ -116,7 +128,7 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
             },
             load_s: 0.0,
         },
-        remedies: Vec::new(),
+        remedies: outcome.remedies,
     }
 }
 
