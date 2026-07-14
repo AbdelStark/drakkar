@@ -1,0 +1,15 @@
+[package]
+name = "drakkar-fit"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "The DRAKKAR feasibility engine: memory model, hardware profiles, context ceilings, and performance estimates (layer 0, RFC-0004)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,15 @@
+[package]
+name = "drakkar-models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "The model acquisition and format pipeline: reference resolution, HF hub client, downloads, conversion, and the content-addressed store (layer 1, RFC-0006)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+
+[lints]
+workspace = true

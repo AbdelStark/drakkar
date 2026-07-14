@@ -1,0 +1,20 @@
+[package]
+name = "drakkar-server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "The HTTP layer: OpenAI and Anthropic dialect handlers, SSE streaming, /fit, /v1/models (layer 3, RFC-0007)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+drakkar-fit = { workspace = true }
+drakkar-grammar = { workspace = true }
+drakkar-engine = { workspace = true }
+drakkar-models = { workspace = true }
+drakkar-sched = { workspace = true }
+
+[lints]
+workspace = true

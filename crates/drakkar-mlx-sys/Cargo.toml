@@ -1,0 +1,17 @@
+[package]
+name = "drakkar-mlx-sys"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Raw FFI bindings to the dk_* C ABI exported by the vendored MLX C++ shim (layer 1, RFC-0002 D2/RFC-0010). Build-orchestration stub."
+
+# No workspace dependencies (DEP6): this crate exposes raw `dk_*` symbols only.
+# `bindgen` (pinned in [workspace.dependencies]) and the CMake shim build are
+# wired in by #163/#164; today this is a link-free stub.
+[dependencies]
+
+[lints]
+workspace = true

@@ -1,0 +1,35 @@
+[package]
+name = "drakkar-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "The drakkar binary: command parsing, output rendering, and the composition root (layer 4, RFC-0008)."
+
+[[bin]]
+name = "drakkar"
+path = "src/main.rs"
+
+[features]
+# The GGUF backend (RFC-0002 D4) is on by default, and therefore in release
+# builds. Turn it off with `--no-default-features` to build an MLX-only binary.
+default = ["gguf"]
+gguf = ["dep:drakkar-gguf"]
+
+[dependencies]
+drakkar-core = { workspace = true }
+drakkar-fit = { workspace = true }
+drakkar-grammar = { workspace = true }
+drakkar-engine = { workspace = true }
+drakkar-models = { workspace = true }
+drakkar-sched = { workspace = true }
+drakkar-server = { workspace = true }
+# Backend crates: only the composition root names them (DEP4), and only to call
+# their `backend()` factory functions returning `Box<dyn InferenceBackend>`.
+drakkar-mlx = { workspace = true }
+drakkar-gguf = { workspace = true, optional = true }
+
+[lints]
+workspace = true
