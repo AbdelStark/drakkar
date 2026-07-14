@@ -36,5 +36,8 @@ drakkar-server = { workspace = true }
 drakkar-mlx = { workspace = true }
 drakkar-gguf = { workspace = true, optional = true }
 
+[dev-dependencies]
+proptest = "1"
+
 [lints]
 workspace = true

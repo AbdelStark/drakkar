@@ -145,6 +145,7 @@ dependencies = [
  "drakkar-models",
  "drakkar-sched",
  "drakkar-server",
+ "proptest",
  "serde",
  "serde_json",
 ]

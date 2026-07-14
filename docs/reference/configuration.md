@@ -5,8 +5,22 @@ the store is reconstructible from it plus the model cache, so it is the one file
 worth backing up. It carries the `drakkar.config/1` schema
 ([data model §4.5](../spec/03-data-model.md#45-configuration-configtoml-drakkarconfig1)).
 
-Default location: `~/.config/drakkar/config.toml`. A missing file is not an error
-— every key falls back to a built-in default.
+Default location: `~/.config/drakkar/config.toml` (honoring `XDG_CONFIG_HOME`). A
+missing file is not an error — every key falls back to a built-in default.
+
+## Commands
+
+```
+drakkar config path            # print the config file location
+drakkar config get <key>       # print a key's effective value and its source layer
+drakkar config set <key> <val> # validate, then write atomically (0600)
+```
+
+`config get` reports the value **and the layer it came from**, e.g.
+`server.port = 9090 (env)`; add `--json` for a single `drakkar.config/1` object
+(`schema` first). `config set` rejects an unknown key or an out-of-range value
+naming the key, exits `2`, and does not touch the file. `server.api_key` is
+redacted in every `get` rendering.
 
 ## Precedence
 

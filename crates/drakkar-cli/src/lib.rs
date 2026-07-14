@@ -14,6 +14,7 @@
 
 pub mod cli;
 pub mod color;
+pub mod config;
 pub mod exit;
 pub mod output;
 
@@ -59,7 +60,12 @@ pub fn run() -> Result<(), DkError> {
 /// Dispatch a parsed command. Command bodies land in their own issues; until
 /// then each command is a wired no-op that reports the milestone status on
 /// stderr (never on stdout, so `--json` stays clean).
-fn dispatch(cli: &Cli, _mode: OutputMode, _color: bool) -> Result<(), DkError> {
+fn dispatch(cli: &Cli, mode: OutputMode, color: bool) -> Result<(), DkError> {
+    // Implemented command bodies dispatch here; the rest fall through to the
+    // wired no-op below until their own issues land.
+    if let Command::Config { action } = &cli.command {
+        return config::run(action, mode, color);
+    }
     let name = match &cli.command {
         Command::Run { .. } => "run",
         Command::Pull { .. } => "pull",
