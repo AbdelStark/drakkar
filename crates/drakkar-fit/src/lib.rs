@@ -23,6 +23,7 @@ pub mod kv;
 mod machine;
 pub mod memory;
 mod model;
+pub mod perf;
 mod request;
 pub mod verdict;
 
@@ -34,10 +35,7 @@ pub use request::RequestShape;
 // name `drakkar_fit::FitReport` without reaching into core (DM1: one definition).
 pub use drakkar_core::FitReport;
 
-use drakkar_core::{
-    Confidence, Estimate, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel, FitPerformance,
-    TtftEstimate,
-};
+use drakkar_core::{Confidence, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel};
 
 /// The FE24 confidence tier printed with every prediction. An alias for
 /// `drakkar-core`'s `Confidence` (`measured` / `calibrated` / `modeled`), which
@@ -118,19 +116,7 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
             max_kv4: Some(ceilings.max_kv4 as u32),
             advertised: model.advertised_ctx,
         },
-        // Placeholder — the performance model (#231) fills these.
-        performance: FitPerformance {
-            decode_tps: Estimate {
-                value: 0.0,
-                confidence: Confidence::Modeled,
-            },
-            ttft_cold_s: TtftEstimate {
-                value: 0.0,
-                prompt: 0,
-                confidence: Confidence::Modeled,
-            },
-            load_s: 0.0,
-        },
+        performance: perf::performance(model, machine, request.target_ctx, request.kv_bits),
         remedies: outcome.remedies,
     }
 }
