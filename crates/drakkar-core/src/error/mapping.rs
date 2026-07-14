@@ -60,6 +60,7 @@ pub const fn http_status(code: ErrorCode) -> u16 {
         | ErrorCode::ModelsGatedRepoNoToken
         | ErrorCode::ModelsUnsupportedArchitecture
         | ErrorCode::ModelsPickleRejected
+        | ErrorCode::ModelsInvalidMetadata
         | ErrorCode::DownloadNetworkFailed
         | ErrorCode::DownloadHubUnreachable
         | ErrorCode::DownloadIntegrityMismatch

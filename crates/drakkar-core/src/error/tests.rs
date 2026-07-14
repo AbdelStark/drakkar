@@ -4,12 +4,12 @@ use super::*;
 use serde_json::{Value, json};
 
 #[test]
-fn registry_has_exactly_35_distinct_codes() {
-    assert_eq!(ALL_ERROR_CODES.len(), 35);
+fn registry_has_exactly_36_distinct_codes() {
+    assert_eq!(ALL_ERROR_CODES.len(), 36);
     let mut strings: Vec<&str> = ALL_ERROR_CODES.iter().map(|c| c.as_str()).collect();
     strings.sort_unstable();
     strings.dedup();
-    assert_eq!(strings.len(), 35, "code strings must be distinct");
+    assert_eq!(strings.len(), 36, "code strings must be distinct");
 }
 
 #[test]

@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc e6e94b492271c5be7ad7e4e95f390ea1af97e64f7048075f7365f2acd87f3e53 # shrinks to code = ModelsInvalidMetadata, message = "", context = ErrorContext({}), retry = Terminal

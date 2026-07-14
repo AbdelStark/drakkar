@@ -135,6 +135,8 @@ pub enum ErrorCode {
     ModelsUnsupportedArchitecture,
     /// `models.pickle_rejected`
     ModelsPickleRejected,
+    /// `models.invalid_metadata`
+    ModelsInvalidMetadata,
     /// `download.network_failed`
     DownloadNetworkFailed,
     /// `download.hub_unreachable`
@@ -189,7 +191,7 @@ pub enum ErrorCode {
 
 /// Every [`ErrorCode`] variant, in registry order — the iteration source for
 /// exhaustiveness tests and the golden tuple snapshot.
-pub const ALL_ERROR_CODES: [ErrorCode; 35] = [
+pub const ALL_ERROR_CODES: [ErrorCode; 36] = [
     ErrorCode::CliInvalidArgs,
     ErrorCode::CliMissingModelArg,
     ErrorCode::ConfigInvalidKey,
@@ -200,6 +202,7 @@ pub const ALL_ERROR_CODES: [ErrorCode; 35] = [
     ErrorCode::ModelsGatedRepoNoToken,
     ErrorCode::ModelsUnsupportedArchitecture,
     ErrorCode::ModelsPickleRejected,
+    ErrorCode::ModelsInvalidMetadata,
     ErrorCode::DownloadNetworkFailed,
     ErrorCode::DownloadHubUnreachable,
     ErrorCode::DownloadIntegrityMismatch,
@@ -242,6 +245,7 @@ impl ErrorCode {
             ErrorCode::ModelsGatedRepoNoToken => "models.gated_repo_no_token",
             ErrorCode::ModelsUnsupportedArchitecture => "models.unsupported_architecture",
             ErrorCode::ModelsPickleRejected => "models.pickle_rejected",
+            ErrorCode::ModelsInvalidMetadata => "models.invalid_metadata",
             ErrorCode::DownloadNetworkFailed => "download.network_failed",
             ErrorCode::DownloadHubUnreachable => "download.hub_unreachable",
             ErrorCode::DownloadIntegrityMismatch => "download.integrity_mismatch",
@@ -299,6 +303,7 @@ impl ErrorCode {
             }
             ErrorCode::ModelsUnsupportedArchitecture
             | ErrorCode::ModelsPickleRejected
+            | ErrorCode::ModelsInvalidMetadata
             | ErrorCode::DownloadIntegrityMismatch
             | ErrorCode::StoreCorruptBlob => ErrorCategory::Format,
             ErrorCode::ServerModelLoading
@@ -351,6 +356,7 @@ impl ErrorCode {
             | ErrorCode::ModelsGatedRepoNoToken
             | ErrorCode::ModelsUnsupportedArchitecture
             | ErrorCode::ModelsPickleRejected
+            | ErrorCode::ModelsInvalidMetadata
             | ErrorCode::DownloadHubUnreachable
             | ErrorCode::StoreWriteFailed
             | ErrorCode::StoreCorruptBlob

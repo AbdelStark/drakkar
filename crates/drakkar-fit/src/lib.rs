@@ -23,12 +23,14 @@ pub mod json;
 pub mod kv;
 mod machine;
 pub mod memory;
+pub mod metadata;
 mod model;
 pub mod perf;
 mod request;
 pub mod verdict;
 
 pub use machine::MachineProfile;
+pub use metadata::{RepoFile, parse_model_descriptor};
 pub use model::{ModelDescriptor, TensorEntry};
 pub use request::RequestShape;
 

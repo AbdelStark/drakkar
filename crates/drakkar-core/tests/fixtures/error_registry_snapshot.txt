@@ -9,6 +9,7 @@ models.repo_not_found | model_not_found | 3 | 404
 models.gated_repo_no_token | model_not_found | 3 | 404
 models.unsupported_architecture | format | 6 | 422
 models.pickle_rejected | format | 6 | 422
+models.invalid_metadata | format | 6 | 422
 download.network_failed | network | 5 | 503
 download.hub_unreachable | network | 5 | 503
 download.integrity_mismatch | format | 6 | 422
