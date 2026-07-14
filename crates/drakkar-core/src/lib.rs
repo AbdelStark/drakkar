@@ -18,7 +18,7 @@
 //!
 //! # The `session` feature
 //!
-//! [`RenderTarget`] and the [`GenerationRequest::render`] accessor are gated
+//! `RenderTarget` and the `GenerationRequest::render` accessor are gated
 //! behind the `session` feature. The session/render layer (`drakkar-server`,
 //! `drakkar-cli`) enables it; the scheduler and engine do not, so the
 //! dialect-carrying `render` value is unreadable below the session layer
@@ -28,6 +28,7 @@
 
 pub mod artifact;
 pub mod capabilities;
+pub mod error;
 pub mod fit;
 pub mod ids;
 pub mod memory;
@@ -38,6 +39,10 @@ pub use artifact::{
     QuantDesc, ToolDialect,
 };
 pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
+pub use error::{
+    ALL_ERROR_CODES, ContextValue, DkError, ERROR_SCHEMA, ErrorCategory, ErrorCode, ErrorContext,
+    Remedy, RemedyTemplate, Retry,
+};
 pub use fit::{
     BudgetSource, Confidence, Estimate, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel,
     FitPerformance, FitReport, Remedy as FitRemedy, RemedyKind as FitRemedyKind, TtftEstimate,
