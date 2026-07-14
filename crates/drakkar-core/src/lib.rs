@@ -44,7 +44,7 @@ pub use artifact::{
 pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
 pub use error::{
     ALL_ERROR_CODES, ContextValue, DkError, ERROR_SCHEMA, ErrorCategory, ErrorCode, ErrorContext,
-    Remedy, RemedyTemplate, Retry,
+    ErrorSurface, Remedy, RemedyTemplate, Retry,
 };
 pub use exec::{
     BlockTableRef, DecodeBatch, DecodeEntry, DraftTokens, FinishReason, MaskRef, PrefillChunk,
