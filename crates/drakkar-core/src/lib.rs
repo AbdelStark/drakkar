@@ -28,6 +28,7 @@
 
 pub mod artifact;
 pub mod capabilities;
+pub mod config;
 pub mod error;
 pub mod exec;
 pub mod fit;
@@ -42,6 +43,10 @@ pub use artifact::{
     QuantDesc, ToolDialect,
 };
 pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
+pub use config::{
+    Config, ImportHfCache, KvCacheConfig, ModelsConfig, RuntimeConfig, SchedulerConfig,
+    ServerConfig, StorageConfig, Telemetry,
+};
 pub use error::{
     ALL_ERROR_CODES, ContextValue, DkError, ERROR_SCHEMA, ErrorCategory, ErrorCode, ErrorContext,
     ErrorSurface, Remedy, RemedyTemplate, Retry,

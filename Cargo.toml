@@ -54,6 +54,9 @@ bindgen = "0.71"
 # thiserror is the `thiserror`-class utility crate that drakkar-core's error
 # taxonomy (RFC-0011) builds on (docs/spec/01-architecture.md §3).
 thiserror = "2"
+# TOML parser for the user-owned config.toml (drakkar.config/1, LD23). A mandated
+# format for the one user-edited file; the serde-integrated standard crate.
+toml = "1"
 
 # Shared lint table applied by every crate via `[lints] workspace = true`.
 # Kept conservative so the skeleton and the (unsafe) FFI crates both build clean.

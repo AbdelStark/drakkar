@@ -13,6 +13,13 @@ PR (RV30). Dates are ISO 8601.
 
 ### Added
 
+- `drakkar.config/1` configuration library in `drakkar-core`: the `config.toml`
+  schema, the four-level precedence resolver (flags > `DRAKKAR_*` env > file >
+  defaults), the mechanical env mapping (`server.port` ⇔ `DRAKKAR_SERVER_PORT`),
+  range/type validation returning `config.invalid_key`/`config.invalid_value`,
+  suffixed-duration parsing, and an atomic (temp + rename) `set` writer that
+  re-validates before touching the file (#126).
+
 ### Changed
 
 ### Deprecated
