@@ -16,6 +16,7 @@ test-util = []
 [dependencies]
 drakkar-core = { workspace = true }
 drakkar-fit = { workspace = true }
+tracing = { workspace = true }
 
 [lints]
 workspace = true
