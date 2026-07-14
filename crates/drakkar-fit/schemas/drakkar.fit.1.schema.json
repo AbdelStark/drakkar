@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://drakkar.dev/schemas/drakkar.fit/1",
+  "title": "drakkar.fit/1",
+  "description": "The feasibility report shared by CLI --json, POST /fit, and downstream consumers (RFC-0004 FE26). Additive-only within major 1.",
+  "type": "object",
+  "required": [
+    "schema",
+    "model",
+    "machine",
+    "memory",
+    "verdict",
+    "headroom_gib",
+    "context",
+    "performance",
+    "remedies"
+  ],
+  "properties": {
+    "schema": { "const": "drakkar.fit/1" },
+    "model": {
+      "type": "object",
+      "required": ["id", "arch", "params_total", "params_active", "quant"],
+      "properties": {
+        "id": { "type": "string" },
+        "arch": { "type": "string" },
+        "params_total": { "type": "number" },
+        "params_active": { "type": "number" },
+        "quant": {
+          "type": "object",
+          "required": ["scheme", "bits", "group", "bpw_eff"],
+          "properties": {
+            "scheme": { "type": "string" },
+            "bits": { "type": "integer" },
+            "group": { "type": "integer" },
+            "bpw_eff": { "type": "number" },
+            "recipe": { "type": "string" }
+          }
+        }
+      }
+    },
+    "machine": {
+      "type": "object",
+      "required": [
+        "chip",
+        "ram_gib",
+        "budget_gib",
+        "budget_source",
+        "bandwidth_gbs",
+        "nax",
+        "wired_limit_mb"
+      ],
+      "properties": {
+        "chip": { "type": "string" },
+        "ram_gib": { "type": "number" },
+        "budget_gib": { "type": "number" },
+        "budget_source": { "type": "string", "enum": ["probe", "table"] },
+        "bandwidth_gbs": { "type": "number" },
+        "nax": { "type": "boolean" },
+        "wired_limit_mb": { "type": "integer" }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "required": [
+        "weights_gib",
+        "kv_per_token_kib",
+        "kv_at_ctx_gib",
+        "activation_gib",
+        "runtime_gib",
+        "total_gib",
+        "confidence"
+      ],
+      "properties": {
+        "weights_gib": { "type": "number" },
+        "kv_per_token_kib": { "type": "number" },
+        "kv_at_ctx_gib": { "type": "number" },
+        "activation_gib": { "type": "number" },
+        "runtime_gib": { "type": "number" },
+        "total_gib": { "type": "number" },
+        "confidence": {
+          "type": "string",
+          "enum": ["measured", "calibrated", "modeled"]
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["comfortable", "tight", "needs_tuning", "wont_fit"]
+    },
+    "headroom_gib": { "type": "number" },
+    "context": {
+      "type": "object",
+      "required": ["requested", "max_fp16", "max_kv8", "advertised"],
+      "properties": {
+        "requested": { "type": "integer" },
+        "max_fp16": { "type": "integer" },
+        "max_kv8": { "type": "integer" },
+        "max_kv4": { "type": "integer" },
+        "advertised": { "type": "integer" }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "required": ["decode_tps", "ttft_cold_s", "load_s"],
+      "properties": {
+        "decode_tps": {
+          "type": "object",
+          "required": ["value", "confidence"],
+          "properties": {
+            "value": { "type": "number" },
+            "confidence": {
+              "type": "string",
+              "enum": ["measured", "calibrated", "modeled"]
+            }
+          }
+        },
+        "ttft_cold_s": {
+          "type": "object",
+          "required": ["value", "prompt", "confidence"],
+          "properties": {
+            "value": { "type": "number" },
+            "prompt": { "type": "integer" },
+            "confidence": {
+              "type": "string",
+              "enum": ["measured", "calibrated", "modeled"]
+            }
+          }
+        },
+        "load_s": { "type": "number" }
+      }
+    },
+    "remedies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rank", "kind", "command", "effect"],
+        "properties": {
+          "rank": { "type": "integer" },
+          "kind": { "type": "string" },
+          "command": { "type": "string" },
+          "effect": { "type": "string" }
+        }
+      }
+    }
+  }
+}

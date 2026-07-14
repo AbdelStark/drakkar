@@ -19,6 +19,7 @@
 #![warn(missing_docs)]
 
 pub mod context;
+pub mod json;
 pub mod kv;
 mod machine;
 pub mod memory;
