@@ -18,6 +18,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod context;
 pub mod kv;
 mod machine;
 pub mod memory;
@@ -69,6 +70,7 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
     let kv_per_token = memory::kv_bytes_per_token(model, request.kv_bits, memory::KV_GROUP_DEFAULT);
     let usable = memory::usable(machine, memory::RUNTIME_OVERHEAD_BYTES);
     let headroom_gib = (machine.budget_bytes as f64 - mem.total as f64) / memory::BYTES_PER_GIB;
+    let ceilings = context::ctx_ceilings(model, machine, request.concurrency);
     // Floor plan (FE19): 4k context, 8-bit KV — used to separate Needs-tuning
     // from Won't-fit.
     let floor = memory::total(model, 4096, 1, 8);
@@ -111,9 +113,9 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
         headroom_gib,
         context: FitContext {
             requested: request.target_ctx,
-            max_fp16: 0,
-            max_kv8: 0,
-            max_kv4: None,
+            max_fp16: ceilings.max_fp16 as u32,
+            max_kv8: ceilings.max_kv8 as u32,
+            max_kv4: Some(ceilings.max_kv4 as u32),
             advertised: model.advertised_ctx,
         },
         // Placeholder — the performance model (#231) fills these.
