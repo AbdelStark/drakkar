@@ -70,7 +70,7 @@ a taxonomy result.
 | `model_not_found` | The model reference does not resolve to anything servable: unknown/uninstalled/gated repo, no compatible artifact | 3 | 404 | no |
 | `infeasible` | The feasibility engine or admission control rejects the plan or request (RFC-0004 FE18/FE19) | 4 | 422 | per-code |
 | `network` | Hub or download-path failure: unreachable, interrupted | 5 | 503 | yes (backoff) |
-| `format` | The artifact or its metadata is unusable: pickle rejected, unsupported architecture, corrupt/mismatched blob | 6 | 422 | no |
+| `format` | The artifact or its metadata is unusable: pickle rejected, unsupported architecture, malformed metadata, corrupt/mismatched blob | 6 | 422 | no |
 | `engine` | Backend/runtime failure: Metal init, model load, inference fault, transient loading state | 6 | 500 | no |
 | `disk` | Local storage failure: insufficient space (preflighted, MP9), store write errors | 7 | 507 | no |
 | `internal` | Invariant violations, ABI-boundary faults, and caught panics; always a DRAKKAR bug | 6 | 500 | no |
@@ -102,7 +102,7 @@ The structured fields required by RFC-0007 AS8 are normative:
 | 400 | `server.unsupported_field`, `config.invalid_key`, `config.invalid_value`; malformed bodies | `param` (offending field) where applicable |
 | 404 | `models.not_found`, `models.not_installed`, `models.repo_not_found`, `models.gated_repo_no_token` | — |
 | 413 | `fit.context_exceeded` | `max_admissible_tokens` (AS8) |
-| 422 | `fit.wont_fit`, `grammar.schema_compile_failed`, `models.unsupported_architecture`, `models.pickle_rejected`, `download.integrity_mismatch`, `store.corrupt_blob` | `reason` |
+| 422 | `fit.wont_fit`, `grammar.schema_compile_failed`, `models.unsupported_architecture`, `models.pickle_rejected`, `models.invalid_metadata`, `download.integrity_mismatch`, `store.corrupt_blob` | `reason` |
 | 429 | `kv.pool_exhausted` | `retry_after_ms`, `pool_occupancy` (AS8); `Retry-After` header also set |
 | 500 | `engine.*` faults, `backend.*`, `abi.*`, `internal.*` | — |
 | 503 | `server.model_loading`, `download.hub_unreachable`, `download.network_failed` (server-side load) | `progress` (0.0-1.0) for `model_loading` (AS8) |
@@ -160,6 +160,7 @@ committed golden snapshot of each variant's `(as_str, category, exit, http)` tup
 | `models.gated_repo_no_token` | model_not_found | both | 404 | terminal | `{repo} is gated. Accept the license at {acceptance_url}, then provide a token (HF_TOKEN, ~/.huggingface, or keychain; RFC-0006 MP2).` |
 | `models.unsupported_architecture` | format | both | 422 | terminal | `Architecture '{arch}' is not in the model-def layer of this build. Try a GGUF artifact ('drakkar pull {ref} --format gguf', backend B), or upgrade: architectures are added on a weekly cadence (RFC-0002 D3).` |
 | `models.pickle_rejected` | format | both | 422 | terminal | `{file} is a pickle checkpoint; pickle executes code on load and is never accepted (RFC-0001 A11, RFC-0006 MP6). Use a safetensors or GGUF export of this model; conversion guidance: {docs_url}.` |
+| `models.invalid_metadata` | format | both | 422 | terminal | `The metadata for '{ref}' is malformed and cannot be read: {reason}. This is a defect in the repository's config.json or safetensors index, not your command. Try pinning a known-good revision with '@<rev>', or a GGUF artifact ('drakkar pull {ref} --format gguf').` |
 | `download.network_failed` | network | cli | 503 | after_backoff | `Download interrupted at {percent}% ({bytes_done} of {bytes_total}). Re-run the same command to resume; completed files are never re-fetched (RFC-0006 MP7).` |
 | `download.hub_unreachable` | network | both | 503 | after_backoff | `Could not reach the hub: {cause}. Check connectivity and proxy settings; installed models keep working offline ('drakkar ls').` |
 | `download.integrity_mismatch` | format | cli | 422 | terminal | `{file} failed integrity verification (expected {expected}, got {actual}); the blob was discarded (RFC-0006 MP8). Re-run to re-fetch; if it persists, pin a known-good revision with '@{rev}'.` |

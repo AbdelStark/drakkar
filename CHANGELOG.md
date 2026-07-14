@@ -13,6 +13,12 @@ PR (RV30). Dates are ISO 8601.
 
 ### Added
 
+- FE1 model-metadata parser (`drakkar_fit::parse_model_descriptor`): builds a
+  validated `ModelDescriptor` from `config.json`, the safetensors index, and
+  quantization config **without downloading weights**, with defensive bounds on
+  every parsed integer. Malformed, truncated, or out-of-range metadata is
+  rejected with the new stable error code `models.invalid_metadata` (`format`
+  category, exit 6 / HTTP 422) rather than propagated or panicking (#226).
 - `drakkar config get|set|path` commands: `get` reports a key's effective value
   and the precedence layer it came from (flag/env/file/default) with a
   `drakkar.config/1` `--json` object; `set` validates and writes atomically at

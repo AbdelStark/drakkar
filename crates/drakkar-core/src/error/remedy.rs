@@ -114,6 +114,10 @@ const MODELS_PICKLE_REJECTED: RemedyTemplate = template!(
     "models_pickle_rejected",
     "{file} is a pickle checkpoint; pickle executes code on load and is never accepted (RFC-0001 A11, RFC-0006 MP6). Use a safetensors or GGUF export of this model; conversion guidance: {docs_url}."
 );
+const MODELS_INVALID_METADATA: RemedyTemplate = template!(
+    "models_invalid_metadata",
+    "The metadata for '{ref}' is malformed and cannot be read: {reason}. This is a defect in the repository's config.json or safetensors index, not your command. Try pinning a known-good revision with '@<rev>', or a GGUF artifact ('drakkar pull {ref} --format gguf')."
+);
 const DOWNLOAD_NETWORK_FAILED: RemedyTemplate = template!(
     "resume_pull",
     "Download interrupted at {percent}% ({bytes_done} of {bytes_total}). Re-run the same command to resume; completed files are never re-fetched (RFC-0006 MP7)."
@@ -205,7 +209,7 @@ const ABI_INVALID_ARGUMENT: RemedyTemplate = template!(
 
 /// Every registered remedy template, for id-based lookup on deserialize. One per
 /// non-`internal.*` code (32 codes); the three `internal.*` codes are exempt.
-const ALL_TEMPLATES: [&RemedyTemplate; 32] = [
+const ALL_TEMPLATES: [&RemedyTemplate; 33] = [
     &CLI_INVALID_ARGS,
     &CLI_MISSING_MODEL_ARG,
     &CONFIG_INVALID_KEY,
@@ -216,6 +220,7 @@ const ALL_TEMPLATES: [&RemedyTemplate; 32] = [
     &MODELS_GATED_REPO_NO_TOKEN,
     &MODELS_UNSUPPORTED_ARCHITECTURE,
     &MODELS_PICKLE_REJECTED,
+    &MODELS_INVALID_METADATA,
     &DOWNLOAD_NETWORK_FAILED,
     &DOWNLOAD_HUB_UNREACHABLE,
     &DOWNLOAD_INTEGRITY_MISMATCH,
@@ -255,6 +260,7 @@ pub fn template_for(code: ErrorCode) -> Option<&'static RemedyTemplate> {
         ErrorCode::ModelsGatedRepoNoToken => &MODELS_GATED_REPO_NO_TOKEN,
         ErrorCode::ModelsUnsupportedArchitecture => &MODELS_UNSUPPORTED_ARCHITECTURE,
         ErrorCode::ModelsPickleRejected => &MODELS_PICKLE_REJECTED,
+        ErrorCode::ModelsInvalidMetadata => &MODELS_INVALID_METADATA,
         ErrorCode::DownloadNetworkFailed => &DOWNLOAD_NETWORK_FAILED,
         ErrorCode::DownloadHubUnreachable => &DOWNLOAD_HUB_UNREACHABLE,
         ErrorCode::DownloadIntegrityMismatch => &DOWNLOAD_INTEGRITY_MISMATCH,

@@ -54,6 +54,7 @@ Exit code 1 is deliberately unassigned and never emitted intentionally.
 | `models.gated_repo_no_token` | `model_not_found` | both | 404 | `terminal` | `accept_license` |
 | `models.unsupported_architecture` | `format` | both | 422 | `terminal` | `models_unsupported_architecture` |
 | `models.pickle_rejected` | `format` | both | 422 | `terminal` | `models_pickle_rejected` |
+| `models.invalid_metadata` | `format` | both | 422 | `terminal` | `models_invalid_metadata` |
 
 ### `download`
 

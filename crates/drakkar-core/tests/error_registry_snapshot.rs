@@ -66,7 +66,7 @@ fn error_registry_snapshot_matches_golden() {
 }
 
 #[test]
-fn snapshot_covers_all_35_codes() {
-    assert_eq!(ALL_ERROR_CODES.len(), 35);
-    assert_eq!(produce_snapshot().lines().count(), 36); // header + 35 rows
+fn snapshot_covers_all_36_codes() {
+    assert_eq!(ALL_ERROR_CODES.len(), 36);
+    assert_eq!(produce_snapshot().lines().count(), 37); // header + 36 rows
 }
