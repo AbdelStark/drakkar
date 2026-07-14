@@ -29,6 +29,7 @@
 pub mod artifact;
 pub mod capabilities;
 pub mod error;
+pub mod exec;
 pub mod fit;
 pub mod ids;
 pub mod memory;
@@ -43,6 +44,10 @@ pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
 pub use error::{
     ALL_ERROR_CODES, ContextValue, DkError, ERROR_SCHEMA, ErrorCategory, ErrorCode, ErrorContext,
     Remedy, RemedyTemplate, Retry,
+};
+pub use exec::{
+    BlockTableRef, DecodeBatch, DecodeEntry, DraftTokens, FinishReason, MaskRef, PrefillChunk,
+    SamplerStateRef, TokenOut, TopLogprob,
 };
 pub use fit::{
     BudgetSource, Confidence, Estimate, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel,
