@@ -220,6 +220,44 @@ impl SchemaTag {
     pub fn major(&self) -> Option<u32> {
         self.0.rsplit_once('/').and_then(|(_, m)| m.parse().ok())
     }
+
+    /// Parse any `"drakkar.<name>/<major>"` string into its registry short name
+    /// (the `<name>` without the `drakkar.` prefix) and major version (DM7).
+    /// Returns `None` for a string that is not a well-formed schema tag.
+    ///
+    /// This differs from [`SchemaTag::name`], which returns the full dotted
+    /// family name including the `drakkar.` prefix; `parse` yields the registry
+    /// short name, e.g. `"drakkar.fit/1"` → (`"fit"`, `1`).
+    #[must_use]
+    pub fn parse(s: &str) -> Option<ParsedSchemaTag> {
+        let inner = s.strip_prefix("drakkar.")?;
+        let (name, major) = inner.rsplit_once('/')?;
+        if name.is_empty() {
+            return None;
+        }
+        let major: u32 = major.parse().ok()?;
+        Some(ParsedSchemaTag {
+            name: name.to_owned(),
+            major,
+        })
+    }
+}
+
+/// A parsed `"drakkar.<name>/<major>"` schema tag (DM7): the registry short name
+/// and its major version.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct ParsedSchemaTag {
+    /// The registry short name, e.g. `"fit"` (without the `drakkar.` prefix).
+    pub name: String,
+    /// The major version.
+    pub major: u32,
+}
+
+/// Render a registry short name and major back into a `"drakkar.<name>/<major>"`
+/// tag string — the inverse of [`SchemaTag::parse`].
+#[must_use]
+pub fn render_schema_tag(name: &str, major: u32) -> String {
+    format!("drakkar.{name}/{major}")
 }
 
 impl fmt::Display for SchemaTag {
