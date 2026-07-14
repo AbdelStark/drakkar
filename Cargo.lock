@@ -175,6 +175,7 @@ name = "drakkar-fit"
 version = "0.1.0"
 dependencies = [
  "drakkar-core",
+ "proptest",
  "serde_json",
 ]
 

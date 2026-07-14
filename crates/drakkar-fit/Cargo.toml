@@ -13,5 +13,8 @@ drakkar-core = { workspace = true }
 # Serialization only — no I/O; the crate stays deterministic and offline.
 serde_json = { workspace = true }
 
+[dev-dependencies]
+proptest = "1"
+
 [lints]
 workspace = true
