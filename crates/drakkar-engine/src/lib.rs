@@ -13,3 +13,11 @@
 //! [architecture §6]: https://github.com/AbdelStark/drakkar/blob/main/docs/spec/01-architecture.md
 //! [RFC-0005]: https://github.com/AbdelStark/drakkar/blob/main/docs/rfcs/RFC-0005-kv-cache.md
 #![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+pub mod kv;
+
+pub use kv::{
+    BlockRef, CachedRun, ContiguousKvPool, EvictPolicy, EvictReport, HashChain, KvPool, KvStats,
+    PoolError, Rejection, Reservation,
+};
