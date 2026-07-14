@@ -33,6 +33,7 @@ pub mod fit;
 pub mod ids;
 pub mod memory;
 mod request;
+pub mod schema;
 
 pub use artifact::{
     ArchDescriptor, ArtifactFormat, BlobRef, LayoutClass, ModelArtifact, ModelHandle, MoeTopology,
@@ -49,14 +50,15 @@ pub use fit::{
     Verdict,
 };
 pub use ids::{
-    BlockId, ParseSha256Error, ParseUlidError, PrefixHash, PrefixHashChain, RequestId, SchemaTag,
-    SeqId, Sha256, TokenId, Ulid,
+    BlockId, ParseSha256Error, ParseUlidError, ParsedSchemaTag, PrefixHash, PrefixHashChain,
+    RequestId, SchemaTag, SeqId, Sha256, TokenId, Ulid, render_schema_tag,
 };
 pub use memory::{BudgetMismatch, MemoryBreakdown, MemoryBudget, MemoryReport};
 pub use request::{
     CacheHint, CachePolicy, CompiledGrammar, GenerationRequest, ModelSelector, Priority,
     RequestLimits, SamplerParams, TokenizedPrompt, ToolContext,
 };
+pub use schema::{Surface, VersionedRead, read_versioned, write_versioned};
 
 /// The response-rendering dialect. Exported only with the `session` feature so
 /// that the scheduler and engine cannot name it (DM11/INV-DIALECT).
