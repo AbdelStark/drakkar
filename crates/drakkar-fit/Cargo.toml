@@ -10,6 +10,8 @@ description = "The DRAKKAR feasibility engine: memory model, hardware profiles, 
 
 [dependencies]
 drakkar-core = { workspace = true }
+# Serialization only — no I/O; the crate stays deterministic and offline.
+serde_json = { workspace = true }
 
 [lints]
 workspace = true
