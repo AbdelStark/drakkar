@@ -86,6 +86,29 @@ impl Serialize for ErrorCategory {
     }
 }
 
+/// Which surface(s) an error code can be reached from (error-model §4).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
+pub enum ErrorSurface {
+    /// Only reachable from the CLI.
+    Cli,
+    /// Only reachable from the HTTP server.
+    Http,
+    /// Reachable from both surfaces.
+    Both,
+}
+
+impl ErrorSurface {
+    /// The stable string used in the docs reference (`cli`/`http`/`both`).
+    #[must_use]
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            ErrorSurface::Cli => "cli",
+            ErrorSurface::Http => "http",
+            ErrorSurface::Both => "both",
+        }
+    }
+}
+
 /// The closed error-code registry (error-model §4). Each variant renders to a
 /// stable `subsystem.snake_case` string via [`ErrorCode::as_str`]; that string
 /// is the wire/JSON code. Adding a variant requires a matching §4 row.
@@ -306,6 +329,48 @@ impl ErrorCode {
     #[must_use]
     pub const fn http_status(self) -> u16 {
         mapping::http_status(self)
+    }
+
+    /// Which surface(s) this code can be reached from (error-model §4).
+    #[must_use]
+    pub const fn surface(self) -> ErrorSurface {
+        match self {
+            ErrorCode::CliInvalidArgs
+            | ErrorCode::CliMissingModelArg
+            | ErrorCode::DownloadNetworkFailed
+            | ErrorCode::DownloadIntegrityMismatch
+            | ErrorCode::DownloadNoSpace => ErrorSurface::Cli,
+            ErrorCode::KvPoolExhausted
+            | ErrorCode::ServerUnsupportedField
+            | ErrorCode::ServerModelLoading => ErrorSurface::Http,
+            ErrorCode::ConfigInvalidKey
+            | ErrorCode::ConfigInvalidValue
+            | ErrorCode::ModelsNotFound
+            | ErrorCode::ModelsNotInstalled
+            | ErrorCode::ModelsRepoNotFound
+            | ErrorCode::ModelsGatedRepoNoToken
+            | ErrorCode::ModelsUnsupportedArchitecture
+            | ErrorCode::ModelsPickleRejected
+            | ErrorCode::DownloadHubUnreachable
+            | ErrorCode::StoreWriteFailed
+            | ErrorCode::StoreCorruptBlob
+            | ErrorCode::FitWontFit
+            | ErrorCode::FitContextExceeded
+            | ErrorCode::GrammarSchemaCompileFailed
+            | ErrorCode::EngineLoadFailed
+            | ErrorCode::EngineMetalInitFailed
+            | ErrorCode::EngineInferenceFailed
+            | ErrorCode::BackendMetalFault
+            | ErrorCode::BackendCapabilityAbsent
+            | ErrorCode::BackendIo
+            | ErrorCode::AbiVersionMismatch
+            | ErrorCode::AbiStructSizeMismatch
+            | ErrorCode::AbiThreadViolation
+            | ErrorCode::AbiInvalidArgument
+            | ErrorCode::InternalPanic
+            | ErrorCode::InternalInvariant
+            | ErrorCode::InternalBudgetBreach => ErrorSurface::Both,
+        }
     }
 
     /// The retry class pinned by the registry for this code (error-model §4).
