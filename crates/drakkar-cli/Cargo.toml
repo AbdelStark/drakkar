@@ -19,6 +19,9 @@ default = ["gguf"]
 gguf = ["dep:drakkar-gguf"]
 
 [dependencies]
+clap = { workspace = true, features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
 # The CLI is part of the session/render layer, so it enables the `session`
 # feature and can read `GenerationRequest::render` (DM11/INV-DIALECT).
 drakkar-core = { workspace = true, features = ["session"] }
