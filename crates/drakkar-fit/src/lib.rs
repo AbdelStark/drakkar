@@ -19,6 +19,7 @@
 #![warn(missing_docs)]
 
 mod machine;
+pub mod memory;
 mod model;
 mod request;
 
@@ -50,13 +51,21 @@ fn bytes_to_gib(bytes: u64) -> f64 {
 /// shape (RFC-0004). Deterministic and I/O-free: identical inputs always yield
 /// an identical report.
 ///
-/// This scaffold fills the descriptive facets (model, machine, requested and
-/// advertised context) directly from the inputs. The memory decomposition
-/// (#227), verdict and remedies (#230), context ceilings (#229), and
-/// performance estimates (#231) are populated by the feasibility issues; until
+/// This fills the descriptive facets (model, machine, context) from the inputs
+/// and the memory decomposition and headroom from the memory model (#227). The
+/// verdict and remedies (#230), context ceilings (#229), and performance
+/// estimates (#231) are populated by the remaining feasibility issues; until
 /// then those fields are placeholders carrying `modeled` confidence.
 #[must_use]
 pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestShape) -> FitReport {
+    let mem = memory::total(
+        model,
+        request.target_ctx,
+        request.concurrency,
+        request.kv_bits,
+    );
+    let kv_per_token = memory::kv_bytes_per_token(model, request.kv_bits, memory::KV_GROUP_DEFAULT);
+    let headroom_gib = (machine.budget_bytes as f64 - mem.total as f64) / memory::BYTES_PER_GIB;
     FitReport {
         schema: FIT_SCHEMA,
         model: FitModel {
@@ -75,19 +84,18 @@ pub fn fit(model: &ModelDescriptor, machine: &MachineProfile, request: &RequestS
             nax: machine.nax_tensor_ops,
             wired_limit_mb: machine.wired_limit_mb,
         },
-        // Placeholder — the memory model (#227) fills these.
         memory: FitMemory {
-            weights_gib: 0.0,
-            kv_per_token_kib: 0.0,
-            kv_at_ctx_gib: 0.0,
-            activation_gib: 0.0,
-            runtime_gib: 0.0,
-            total_gib: 0.0,
+            weights_gib: mem.weights as f64 / memory::BYTES_PER_GIB,
+            kv_per_token_kib: kv_per_token / 1024.0,
+            kv_at_ctx_gib: mem.kv_pool as f64 / memory::BYTES_PER_GIB,
+            activation_gib: mem.activation_watermark as f64 / memory::BYTES_PER_GIB,
+            runtime_gib: mem.runtime_overhead as f64 / memory::BYTES_PER_GIB,
+            total_gib: mem.total as f64 / memory::BYTES_PER_GIB,
             confidence: Confidence::Modeled,
         },
         // Placeholder — the verdict tiers and remedies (#230) fill these.
         verdict: Verdict::WontFit,
-        headroom_gib: 0.0,
+        headroom_gib,
         context: FitContext {
             requested: request.target_ctx,
             max_fp16: 0,
@@ -181,6 +189,10 @@ mod tests {
         assert!((report.machine.budget_gib - 36.0).abs() < 1e-6);
         assert_eq!(report.context.requested, 32_768);
         assert_eq!(report.context.advertised, 131_072);
+        // Memory facet is populated by the memory model (#227).
+        assert!(report.memory.weights_gib > 0.0);
+        assert!((report.memory.kv_per_token_kib - 144.0).abs() < 1e-3); // Qwen3-8B: 144 KiB/t
+        assert!(report.memory.total_gib > report.memory.weights_gib);
     }
 
     #[test]
