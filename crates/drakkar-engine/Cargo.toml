@@ -8,6 +8,11 @@ repository.workspace = true
 authors.workspace = true
 description = "The InferenceBackend trait, the KvPool interface, and the engine actor (layer 1, RFC-0001/RFC-0005)."
 
+[features]
+# Exposes `mock::MockBackend`, a GPU-free InferenceBackend double, to downstream
+# crates for tests. Not enabled in normal/release builds.
+test-util = []
+
 [dependencies]
 drakkar-core = { workspace = true }
 drakkar-fit = { workspace = true }

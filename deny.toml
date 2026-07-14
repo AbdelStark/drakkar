@@ -1,0 +1,52 @@
+# cargo-deny configuration.
+#
+# This file currently pins the backend-seam dependency rule (DEP4/DEP5, RFC-0001
+# I5): the backend crates `drakkar-mlx` and `drakkar-gguf` may be depended upon
+# ONLY by the composition root `drakkar-cli`. The `drakkar-engine` crate defines
+# the `InferenceBackend` trait the backends implement and MUST NOT depend on them
+# (DEP3). The CI `seam-deps-check` job runs `cargo deny check bans`.
+#
+# The license allowlist, advisory database, and source policy are added by the
+# supply-chain issues (#54/#140); this file is intentionally scoped to the seam
+# bans for now.
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+
+# `wrappers` is the exhaustive set of crates permitted to depend on the named
+# crate; any other dependent fails the check. This mechanically enforces "only
+# the composition root names the backend crates" (DEP4).
+[[bans.deny]]
+name = "drakkar-mlx"
+wrappers = ["drakkar-cli"]
+
+[[bans.deny]]
+name = "drakkar-gguf"
+wrappers = ["drakkar-cli"]
+
+[[bans.deny]]
+name = "drakkar-mlx-sys"
+wrappers = ["drakkar-mlx"]
+
+[advisories]
+version = 2
+
+[licenses]
+version = 2
+# Permissive placeholder until the release-engineering allowlist lands (#140).
+allow = [
+  "Apache-2.0",
+  "MIT",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Zlib",
+  "MPL-2.0",
+  "CC0-1.0",
+]
+
+[sources]
+unknown-registry = "allow"
+unknown-git = "allow"

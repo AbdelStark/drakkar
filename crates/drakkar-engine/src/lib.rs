@@ -15,8 +15,15 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod backend;
 pub mod kv;
 
+/// A GPU-free backend double for tests; available in this crate's tests and to
+/// downstream crates that enable the `test-util` feature.
+#[cfg(any(test, feature = "test-util"))]
+pub mod mock;
+
+pub use backend::{BackendResult, DecodeOut, InferenceBackend, LogitsRef, PrefillOut};
 pub use kv::{
     BlockRef, CachedRun, ContiguousKvPool, EvictPolicy, EvictReport, HashChain, KvPool, KvStats,
     PoolError, Rejection, Reservation,
