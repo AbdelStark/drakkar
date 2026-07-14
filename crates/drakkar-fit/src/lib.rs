@@ -18,6 +18,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod kv;
 mod machine;
 pub mod memory;
 mod model;
