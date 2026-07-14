@@ -72,9 +72,14 @@ A PR that weakens one is rejected unless it amends RFC-0001 first and says so:
 ## Changelog discipline
 
 Every user-visible change lands with its own `[Unreleased]` entry in
-`CHANGELOG.md` in the same PR (RV30,
+[`CHANGELOG.md`](CHANGELOG.md) in the same PR (RV30,
 [docs/spec/09-release-and-versioning.md §7](docs/spec/09-release-and-versioning.md)).
-CI fails a PR that carries a user-facing area label without a changelog entry.
+The file follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/):
+add lines under the appropriate `Added` / `Changed` / `Deprecated` / `Removed` /
+`Fixed` / `Security` subsection. CI fails a PR that carries a user-facing area
+label without a changelog entry; a change that is genuinely not user-visible
+(internal refactor, test-only, docs) carries the `no-changelog` label to skip
+the check.
 
 ## Development setup
 
