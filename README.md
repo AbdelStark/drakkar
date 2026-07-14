@@ -27,6 +27,34 @@ the remaining RFCs are independently reviewable once those two are absorbed. Eac
 carries a status header, RFC 2119 requirement language (MUST, SHOULD, MAY), open questions
 with owners, and references.
 
+## Workspace layout
+
+The implementation is a Cargo workspace of eleven crates under `crates/`, wired to a strict
+dependency-direction graph (`docs/spec/01-architecture.md` §3, RFC-0002 D1; crate names
+frozen by LD24). A crate may depend only on crates in strictly lower layers, plus
+`drakkar-core`; same-layer edges are forbidden (DEP1). Only `drakkar-cli` names the backend
+crates, and only to call their factory functions (DEP4).
+
+| Layer | Crate | Role |
+| ----- | ----- | ---- |
+| 0 | `drakkar-core` | Shared vocabulary types, error taxonomy, config schema, versioned JSON schemas. Depends on no workspace crate. |
+| 0 | `drakkar-fit` | Feasibility engine (memory math, hardware profiles, estimates). Depends on `drakkar-core` only. |
+| 0 | `drakkar-grammar` | Structured-output engine (`llguidance`). Depends on `drakkar-core` only. |
+| 1 | `drakkar-engine` | `InferenceBackend` trait, `KvPool` interface, engine actor. Depends on `drakkar-core`, `drakkar-fit`. |
+| 1 | `drakkar-models` | Model acquisition and format pipeline. Depends on `drakkar-core`. |
+| 1 | `drakkar-mlx-sys` | Raw FFI bindings to the `dk_*` C ABI. No workspace dependency. |
+| 2 | `drakkar-sched` | Scheduler (admission, continuous batching, chunked prefill). Depends on `drakkar-core`, `drakkar-fit`, `drakkar-engine`. |
+| 2 | `drakkar-mlx` | Backend A (MLX). Depends on `drakkar-core`, `drakkar-engine`, `drakkar-mlx-sys`. |
+| 2 | `drakkar-gguf` | Backend B (llama.cpp), behind the default-on `gguf` feature. Depends on `drakkar-core`, `drakkar-engine`. |
+| 3 | `drakkar-server` | HTTP layer (`axum`/`tokio`). Depends on core, fit, grammar, engine, models, sched. |
+| 4 | `drakkar-cli` | The `drakkar` binary and composition root. Depends on every other workspace crate. |
+
+Build the whole workspace with `cargo build --workspace`. The GGUF backend is enabled by
+default (and in release builds); build an MLX-only binary with
+`cargo build -p drakkar-cli --no-default-features`. The toolchain is pinned by
+`rust-toolchain.toml` (MSRV 1.85, RFC-0002 D5) and third-party version lines are pinned once
+in the workspace `Cargo.toml` under `[workspace.dependencies]` (RFC-0002 D6).
+
 ## Conventions
 
 Requirement IDs are prefixed per document (for example `FE-3` in the Feasibility Engine

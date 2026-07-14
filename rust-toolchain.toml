@@ -1,0 +1,6 @@
+# MSRV pin (RFC-0002 D5, RFC-0012 RE6/RE7). DRAKKAR builds on a fixed toolchain
+# for reproducibility; the channel is bumped only in minor releases with a
+# changelog entry. Edition 2024 requires >= 1.85.
+[toolchain]
+channel = "1.85"
+components = ["rustfmt", "clippy"]

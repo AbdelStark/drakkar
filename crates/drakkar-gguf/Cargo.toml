@@ -1,0 +1,16 @@
+[package]
+name = "drakkar-gguf"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Backend B: llama.cpp embedded via FFI, implementing the same trait with reduced Capabilities (layer 2, RFC-0002 D4)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+drakkar-engine = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "drakkar-mlx"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Backend A: a safe Rust wrapper over drakkar-mlx-sys implementing InferenceBackend and KvPool (layer 2, RFC-0002/RFC-0003/RFC-0010)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+drakkar-engine = { workspace = true }
+drakkar-mlx-sys = { workspace = true }
+
+[lints]
+workspace = true

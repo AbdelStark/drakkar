@@ -1,0 +1,17 @@
+[package]
+name = "drakkar-sched"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "The scheduler: admission control, continuous batching, chunked prefill, and per-request limits (layer 2, RFC-0007)."
+
+[dependencies]
+drakkar-core = { workspace = true }
+drakkar-fit = { workspace = true }
+drakkar-engine = { workspace = true }
+
+[lints]
+workspace = true

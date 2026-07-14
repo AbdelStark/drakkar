@@ -1,0 +1,65 @@
+# DRAKKAR Cargo workspace.
+#
+# The eleven crates and their strict layering are defined by the architecture
+# contract (docs/spec/01-architecture.md §3 "Crate map (LD24)" and §3.1
+# "Dependency direction rules") and RFC-0002 D1. Crate names are frozen by
+# locked decision LD24. Every later PR lands into this graph, which already
+# encodes the dependency-direction rules DEP1-DEP7.
+
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+repository = "https://github.com/AbdelStark/drakkar"
+authors = ["Abdelhamid Bakhta"]
+description = "A native, single-binary LLM inference engine for Apple Silicon."
+
+# Internal crate versions and the RFC-0002 D6 third-party version lines are pinned
+# here once; leaf crates reference them with `workspace = true` rather than
+# re-pinning, so a version bump is a one-line change reviewed against DEP7.
+[workspace.dependencies]
+# Internal crates (path deps, layered per docs/spec/01-architecture.md §3).
+drakkar-core = { path = "crates/drakkar-core", version = "0.1.0" }
+drakkar-fit = { path = "crates/drakkar-fit", version = "0.1.0" }
+drakkar-grammar = { path = "crates/drakkar-grammar", version = "0.1.0" }
+drakkar-engine = { path = "crates/drakkar-engine", version = "0.1.0" }
+drakkar-models = { path = "crates/drakkar-models", version = "0.1.0" }
+drakkar-sched = { path = "crates/drakkar-sched", version = "0.1.0" }
+drakkar-server = { path = "crates/drakkar-server", version = "0.1.0" }
+drakkar-mlx-sys = { path = "crates/drakkar-mlx-sys", version = "0.1.0" }
+drakkar-mlx = { path = "crates/drakkar-mlx", version = "0.1.0" }
+drakkar-gguf = { path = "crates/drakkar-gguf", version = "0.1.0" }
+
+# Third-party version lines (RFC-0002 D6). Versions are pinned to the documented
+# major/minor line; MSRV is pinned separately in rust-toolchain.toml (RFC-0002 D5).
+tokio = "1"
+axum = "0.8"
+tower = "0.5"
+clap = "4"
+hf-hub = "0.4"
+tokenizers = "0.21"
+safetensors = "0.5"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+llguidance = "0.7"
+sysinfo = "0.33"
+tracing = "0.1"
+criterion = "0.5"
+bindgen = "0.71"
+# thiserror is the `thiserror`-class utility crate that drakkar-core's error
+# taxonomy (RFC-0011) builds on (docs/spec/01-architecture.md §3).
+thiserror = "2"
+
+# Shared lint table applied by every crate via `[lints] workspace = true`.
+# Kept conservative so the skeleton and the (unsafe) FFI crates both build clean.
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "warn"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
