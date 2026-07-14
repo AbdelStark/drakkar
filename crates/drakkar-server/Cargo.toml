@@ -9,7 +9,9 @@ authors.workspace = true
 description = "The HTTP layer: OpenAI and Anthropic dialect handlers, SSE streaming, /fit, /v1/models (layer 3, RFC-0007)."
 
 [dependencies]
-drakkar-core = { workspace = true }
+# The server is part of the session/render layer, so it enables the `session`
+# feature and can read `GenerationRequest::render` (DM11/INV-DIALECT).
+drakkar-core = { workspace = true, features = ["session"] }
 drakkar-fit = { workspace = true }
 drakkar-grammar = { workspace = true }
 drakkar-engine = { workspace = true }

@@ -1,0 +1,16 @@
+error[E0432]: unresolved import `drakkar_core::RenderTarget`
+ --> tests/ui/render_target_hidden.rs:3:5
+  |
+3 | use drakkar_core::RenderTarget;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ no `RenderTarget` in the root
+  |
+note: found an item that was configured out
+ --> src/lib.rs
+  |
+  | pub use request::RenderTarget;
+  |                  ^^^^^^^^^^^^
+note: the item is gated behind the `session` feature
+ --> src/lib.rs
+  |
+  | #[cfg(feature = "session")]
+  |       ^^^^^^^^^^^^^^^^^^^
