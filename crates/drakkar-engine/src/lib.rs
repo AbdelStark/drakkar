@@ -15,6 +15,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
+pub mod actor;
 pub mod backend;
 pub mod kv;
 
@@ -23,6 +24,7 @@ pub mod kv;
 #[cfg(any(test, feature = "test-util"))]
 pub mod mock;
 
+pub use actor::{ActorState, EngineActor};
 pub use backend::{BackendResult, DecodeOut, InferenceBackend, LogitsRef, PrefillOut};
 pub use kv::{
     BlockRef, CachedRun, ContiguousKvPool, EvictPolicy, EvictReport, HashChain, KvPool, KvStats,

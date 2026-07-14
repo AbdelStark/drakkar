@@ -167,6 +167,7 @@ version = "0.1.0"
 dependencies = [
  "drakkar-core",
  "drakkar-fit",
+ "tracing",
 ]
 
 [[package]]
