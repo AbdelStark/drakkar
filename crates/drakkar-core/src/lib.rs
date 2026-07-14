@@ -35,6 +35,7 @@ pub mod ids;
 pub mod memory;
 mod request;
 pub mod schema;
+pub mod secret;
 
 pub use artifact::{
     ArchDescriptor, ArtifactFormat, BlobRef, LayoutClass, ModelArtifact, ModelHandle, MoeTopology,
@@ -64,6 +65,7 @@ pub use request::{
     RequestLimits, SamplerParams, TokenizedPrompt, ToolContext,
 };
 pub use schema::{Surface, VersionedRead, read_versioned, write_versioned};
+pub use secret::Secret;
 
 /// The response-rendering dialect. Exported only with the `session` feature so
 /// that the scheduler and engine cannot name it (DM11/INV-DIALECT).
