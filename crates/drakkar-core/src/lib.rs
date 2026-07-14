@@ -44,8 +44,8 @@ pub use artifact::{
 };
 pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
 pub use config::{
-    Config, ImportHfCache, KvCacheConfig, ModelsConfig, RuntimeConfig, SchedulerConfig,
-    ServerConfig, StorageConfig, Telemetry,
+    API_KEY_ENV, Config, ImportHfCache, KvCacheConfig, ModelsConfig, RuntimeConfig,
+    SchedulerConfig, ServerConfig, StorageConfig, Telemetry, resolve_api_key,
 };
 pub use error::{
     ALL_ERROR_CODES, ContextValue, DkError, ERROR_SCHEMA, ErrorCategory, ErrorCode, ErrorContext,

@@ -464,9 +464,87 @@ pub fn to_toml(cfg: &Config) -> String {
     out
 }
 
-/// Set one key and write `config.toml` atomically (temp + rename, CLI11),
-/// validating the key/value before touching the file so a rejected value leaves
-/// the prior file intact.
+/// The dedicated environment variable for the server API key (SEC28). Note this
+/// is *not* the mechanical `DRAKKAR_SERVER_API_KEY` mapping — SEC28 gives the
+/// bearer secret a shorter, documented name.
+pub const API_KEY_ENV: &str = "DRAKKAR_API_KEY";
+
+/// Resolve the server API key with the SEC28 precedence
+/// **`--api-key` flag > `DRAKKAR_API_KEY` env > `server.api_key` in config**.
+///
+/// The result stays wrapped in [`Secret`] so it is never logged or serialized in
+/// plaintext; an unset key resolves to an empty secret.
+#[must_use]
+pub fn resolve_api_key(
+    flag: Option<&str>,
+    env: &BTreeMap<String, String>,
+    config: &Config,
+) -> Secret<String> {
+    if let Some(k) = flag {
+        return Secret::new(k.to_owned());
+    }
+    if let Some(k) = env.get(API_KEY_ENV) {
+        return Secret::new(k.clone());
+    }
+    config.server.api_key.clone()
+}
+
+fn write_err(path: &std::path::Path, cause: std::io::Error) -> DkError {
+    DkError::new(
+        ErrorCode::StoreWriteFailed,
+        format!("writing {} failed: {cause}", path.display()),
+    )
+    .with_context(
+        ErrorContext::new()
+            .with_str("path", path.display().to_string())
+            .with_str("cause", cause.to_string()),
+    )
+}
+
+/// Write `text` to `path` atomically at mode `0600` (SEC20): the temp file is
+/// created private from the first byte (never a window at a looser mode), then
+/// `rename(2)` either fully replaces the target or leaves the prior file intact.
+fn write_atomic_0600(path: &std::path::Path, text: &str) -> Result<(), DkError> {
+    let tmp = path.with_extension("toml.tmp");
+
+    #[cfg(unix)]
+    {
+        use std::io::Write;
+        use std::os::unix::fs::OpenOptionsExt;
+        let mut f = std::fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .mode(0o600)
+            .open(&tmp)
+            .map_err(|e| write_err(&tmp, e))?;
+        f.write_all(text.as_bytes())
+            .map_err(|e| write_err(&tmp, e))?;
+        f.sync_all().map_err(|e| write_err(&tmp, e))?;
+    }
+    #[cfg(not(unix))]
+    {
+        std::fs::write(&tmp, text).map_err(|e| write_err(&tmp, e))?;
+    }
+
+    std::fs::rename(&tmp, path).map_err(|e| {
+        let _ = std::fs::remove_file(&tmp);
+        write_err(path, e)
+    })?;
+
+    // Belt-and-suspenders: if the target pre-existed with looser permissions,
+    // rename adopts the temp inode (0600), but re-assert in case of odd umasks.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o600));
+    }
+    Ok(())
+}
+
+/// Set one key and write `config.toml` atomically at mode `0600` (temp + rename,
+/// CLI11/SEC20), validating the key/value before touching the file so a rejected
+/// value — or a crash mid-write — leaves the prior file intact.
 ///
 /// # Errors
 /// `config.invalid_key`/`config.invalid_value` (before any write), or a
@@ -481,25 +559,7 @@ pub fn set(path: &std::path::Path, key: &str, value: &str) -> Result<(), DkError
     let cfg = resolve(existing.as_deref(), &BTreeMap::new(), &flags)?;
     let text = to_toml(&cfg);
 
-    let write_err = |cause: std::io::Error| {
-        DkError::new(
-            ErrorCode::StoreWriteFailed,
-            format!("writing {} failed: {cause}", path.display()),
-        )
-        .with_context(
-            ErrorContext::new()
-                .with_str("path", path.display().to_string())
-                .with_str("cause", cause.to_string()),
-        )
-    };
-    let tmp = path.with_extension("toml.tmp");
-    std::fs::write(&tmp, &text).map_err(write_err)?;
-    // Atomic replace: rename(2) either fully replaces or leaves the old file.
-    std::fs::rename(&tmp, path).map_err(|e| {
-        let _ = std::fs::remove_file(&tmp);
-        write_err(e)
-    })?;
-    Ok(())
+    write_atomic_0600(path, &text)
 }
 
 #[cfg(test)]
