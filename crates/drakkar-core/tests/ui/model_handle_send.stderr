@@ -7,6 +7,9 @@ error[E0277]: `*const ()` cannot be sent between threads safely
   = help: within `ModelHandle`, the trait `Send` is not implemented for `*const ()`
 note: required because it appears within the type `PhantomData<*const ()>`
  --> $RUST/core/src/marker.rs
+  |
+  | pub struct PhantomData<T: ?Sized>;
+  |            ^^^^^^^^^^^
 note: required because it appears within the type `ModelHandle`
  --> src/artifact.rs
   |

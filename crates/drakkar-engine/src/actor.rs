@@ -32,7 +32,7 @@ const DEFAULT_QUEUE_CAPACITY: usize = 256;
 
 /// A handler exceeding this wall-time without a backend call in progress trips
 /// the debug stall detector (A4).
-const STALL_THRESHOLD: std::time::Duration = std::time::Duration::from_millis(500);
+const STALL_THRESHOLD: std::time::Duration = std::time::Duration::from_millis(500); // status-scan-allow: ms, not an HTTP status
 
 /// The lifecycle state of an actor.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
