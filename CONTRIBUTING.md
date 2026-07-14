@@ -16,7 +16,14 @@ a part of it or changes it first.
 - **Performance claims require harness numbers.** Optimization PRs cite a before/after run
   of the RFC-0009 harness on named hardware. No single-run numbers.
 - **Errors follow the taxonomy.** New failure paths register a stable error code per
-  [docs/spec/04-error-model.md](docs/spec/04-error-model.md) in the same PR.
+  [docs/spec/04-error-model.md](docs/spec/04-error-model.md) in the same PR. Adding a code
+  is a two-file edit in one PR: the §4 registry table and the `ErrorCode` enum in
+  `drakkar-core`. CI enforces the correspondence with an exhaustive match (a new unmapped
+  variant fails to compile) plus a committed golden tuple snapshot
+  (`crates/drakkar-core/tests/fixtures/error_registry_snapshot.txt`); regenerate it with
+  `UPDATE_SNAPSHOT=1 cargo test -p drakkar-core --test error_registry_snapshot`. Exit codes
+  and HTTP statuses are defined only in `drakkar-core::error::mapping`; a status literal
+  anywhere else fails the single-mapping-site test.
 
 ## Development setup
 
