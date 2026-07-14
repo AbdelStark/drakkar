@@ -19,7 +19,9 @@ default = ["gguf"]
 gguf = ["dep:drakkar-gguf"]
 
 [dependencies]
-drakkar-core = { workspace = true }
+# The CLI is part of the session/render layer, so it enables the `session`
+# feature and can read `GenerationRequest::render` (DM11/INV-DIALECT).
+drakkar-core = { workspace = true, features = ["session"] }
 drakkar-fit = { workspace = true }
 drakkar-grammar = { workspace = true }
 drakkar-engine = { workspace = true }

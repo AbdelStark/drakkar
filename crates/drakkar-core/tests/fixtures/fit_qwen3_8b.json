@@ -1,0 +1,13 @@
+{ "schema": "drakkar.fit/1",
+  "model": {"id": "Qwen/Qwen3-8B", "arch": "qwen3", "params_total": 8.19e9, "params_active": 8.19e9,
+             "quant": {"scheme": "mlx_affine", "bits": 4, "group": 64, "bpw_eff": 4.5}},
+  "machine": {"chip": "Apple M4 Pro", "ram_gib": 48, "budget_gib": 36.0, "budget_source": "probe",
+               "bandwidth_gbs": 273, "nax": false, "wired_limit_mb": 0},
+  "memory": {"weights_gib": 4.21, "kv_per_token_kib": 144, "kv_at_ctx_gib": 4.5,
+              "activation_gib": 0.4, "runtime_gib": 1.2, "total_gib": 10.4, "confidence": "modeled"},
+  "verdict": "comfortable", "headroom_gib": 25.6,
+  "context": {"requested": 32768, "max_fp16": 214000, "max_kv8": 468000, "advertised": 131072},
+  "performance": {"decode_tps": {"value": 55, "confidence": "calibrated"},
+                   "ttft_cold_s": {"value": 1.9, "prompt": 4096, "confidence": "modeled"},
+                   "load_s": 1.4},
+  "remedies": [] }

@@ -1,15 +1,59 @@
 //! `drakkar-core` — the bottom of the DRAKKAR dependency graph (layer 0).
 //!
-//! This crate owns the shared vocabulary types (`GenerationRequest`,
-//! `ModelArtifact`, `MemoryBudget`, `MemoryReport`, `Capabilities`,
-//! `SamplerParams`, token/usage types), the error taxonomy
-//! ([RFC-0011]), the config schema, the versioned JSON schema definitions
-//! (invariant I4), and the tracing conventions. It performs no I/O and pulls in
-//! no async runtime; everything in the workspace depends on it and it depends on
-//! no other workspace crate (DEP2).
+//! This crate owns the shared vocabulary types every other crate imports (DM1):
+//! the identifier and hash newtypes ([`Sha256`], [`RequestId`], [`SeqId`],
+//! [`BlockId`], [`TokenId`], [`SchemaTag`], [`PrefixHash`], [`PrefixHashChain`]),
+//! the dialect-free [`GenerationRequest`] and its aggregates, the
+//! artifact/handle pair ([`ModelArtifact`]/[`ModelHandle`]), the memory-contract
+//! types ([`MemoryBudget`]/[`MemoryReport`]), the runtime [`Capabilities`]
+//! struct, and the [`FitReport`] mirror of `drakkar.fit/1`.
 //!
-//! This is the skeleton established by the workspace scaffold (issue #120).
-//! The shared types land in #121 and the error taxonomy in #123.
+//! It performs no I/O and pulls in no async runtime; everything in the workspace
+//! depends on it and it depends on no other workspace crate (DEP2). All types
+//! here are backend-neutral and name no Metal, MLX, or llama.cpp type
+//! (INV-SEAM).
 //!
-//! [RFC-0011]: https://github.com/AbdelStark/drakkar/blob/main/docs/rfcs/RFC-0011-error-taxonomy.md
+//! The error taxonomy (`DkError`) lands in issue #123; the KV pool block types
+//! and the engine-actor message value types land with their subsystems.
+//!
+//! # The `session` feature
+//!
+//! [`RenderTarget`] and the [`GenerationRequest::render`] accessor are gated
+//! behind the `session` feature. The session/render layer (`drakkar-server`,
+//! `drakkar-cli`) enables it; the scheduler and engine do not, so the
+//! dialect-carrying `render` value is unreadable below the session layer
+//! (DM11/INV-DIALECT).
 #![forbid(unsafe_code)]
+#![warn(missing_docs)]
+
+pub mod artifact;
+pub mod capabilities;
+pub mod fit;
+pub mod ids;
+pub mod memory;
+mod request;
+
+pub use artifact::{
+    ArchDescriptor, ArtifactFormat, BlobRef, LayoutClass, ModelArtifact, ModelHandle, MoeTopology,
+    QuantDesc, ToolDialect,
+};
+pub use capabilities::{Capabilities, ChipId, PagedPath, SpecDecodeSupport};
+pub use fit::{
+    BudgetSource, Confidence, Estimate, FIT_SCHEMA, FitContext, FitMachine, FitMemory, FitModel,
+    FitPerformance, FitReport, Remedy as FitRemedy, RemedyKind as FitRemedyKind, TtftEstimate,
+    Verdict,
+};
+pub use ids::{
+    BlockId, ParseSha256Error, ParseUlidError, PrefixHash, PrefixHashChain, RequestId, SchemaTag,
+    SeqId, Sha256, TokenId, Ulid,
+};
+pub use memory::{BudgetMismatch, MemoryBreakdown, MemoryBudget, MemoryReport};
+pub use request::{
+    CacheHint, CachePolicy, CompiledGrammar, GenerationRequest, ModelSelector, Priority,
+    RequestLimits, SamplerParams, TokenizedPrompt, ToolContext,
+};
+
+/// The response-rendering dialect. Exported only with the `session` feature so
+/// that the scheduler and engine cannot name it (DM11/INV-DIALECT).
+#[cfg(feature = "session")]
+pub use request::RenderTarget;

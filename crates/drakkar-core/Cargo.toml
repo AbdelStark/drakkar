@@ -8,11 +8,20 @@ repository.workspace = true
 authors.workspace = true
 description = "Shared vocabulary types, error taxonomy, config schema, and versioned JSON schemas for DRAKKAR (layer 0)."
 
+[features]
+# The `session` feature exposes the dialect-carrying `RenderTarget` and the
+# `GenerationRequest::render` accessor. The session/render layer (server, CLI)
+# enables it; the scheduler and engine do not (DM11/INV-DIALECT).
+session = []
+
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+trybuild = "1"
 
 [lints]
 workspace = true
