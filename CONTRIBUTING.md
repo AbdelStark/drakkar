@@ -92,6 +92,25 @@ the check.
 suites. Integration and conformance suites are described in
 [docs/spec/07-testing-strategy.md](docs/spec/07-testing-strategy.md).
 
+### Toolchain and MSRV
+
+`rust-toolchain.toml` pins the exact channel, version, and target
+(`aarch64-apple-darwin`), so CI, contributors, and release builds all compile
+identically — `rustup` installs it automatically on the first `cargo` command,
+and `cargo build` resolves it without a manual `+toolchain` (RFC-0012 RE6,
+release §4 RV14–RV17).
+
+The pinned version is also DRAKKAR's **MSRV**: the workspace is built on the
+oldest supported stable, so the `rust-version` declared in `Cargo.toml` is
+guaranteed to compile. The MSRV policy is **stable-minus-two**, evaluated at
+each release; raising it is a **minor** release and lands with a `Changed`
+[changelog](CHANGELOG.md) entry (RE6/RE7).
+
+The C++17 MLX shim (`drakkar-mlx-sys`, built via `build.rs`) requires the
+**Xcode Command Line Tools** (clang; Apple clang 15+ / Xcode 15+ for C++17 and
+Metal) and CMake. The exact clang and Xcode CLT versions are recorded in the
+release build provenance (RE7) so a build is reproducible.
+
 ## Pull requests
 
 - Keep PRs to one issue's scope. The issue's acceptance criteria are the review checklist.

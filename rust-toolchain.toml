@@ -1,6 +1,14 @@
-# MSRV pin (RFC-0002 D5, RFC-0012 RE6/RE7). DRAKKAR builds on a fixed toolchain
-# for reproducibility; the channel is bumped only in minor releases with a
-# changelog entry. Edition 2024 requires >= 1.85.
+# Pinned build toolchain (RFC-0002 D5, RFC-0012 RE6/RE7, release §4 RV14–RV17).
+#
+# CI, contributors, and release builds compile with this exact channel so
+# builds are reproducible. This version is also DRAKKAR's MSRV: the workspace is
+# built on the oldest supported stable, which guarantees the declared
+# `rust-version` compiles. The MSRV follows stable-minus-two, evaluated at each
+# release; bumping it is a minor release with a `Changed` changelog entry.
+#
+# Apple Silicon is the only target (RFC-0002 D5, PRD N6); edition 2024 requires
+# >= 1.85.
 [toolchain]
-channel = "1.85"
+channel = "1.85.0"
 components = ["rustfmt", "clippy"]
+targets = ["aarch64-apple-darwin"]
