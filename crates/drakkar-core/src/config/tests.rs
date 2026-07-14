@@ -266,3 +266,71 @@ fn config_to_toml_roundtrips_including_api_key() {
     assert_eq!(back.storage.import_hf_cache, ImportHfCache::Copy);
     assert_eq!(back.runtime.keep_alive, cfg.runtime.keep_alive);
 }
+
+#[cfg(unix)]
+#[test]
+fn config_permissions_are_0600_after_set() {
+    // SEC20: config.toml is written mode 0600 (it may hold server.api_key).
+    use std::os::unix::fs::PermissionsExt;
+    let dir = std::env::temp_dir().join(format!("drakkar-cfg-perm-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("config.toml");
+    let _ = std::fs::remove_file(&path);
+
+    // Fresh create is 0600.
+    set(&path, "server.api_key", "sk-live-123").unwrap();
+    let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o600, "fresh config must be 0600, got {mode:o}");
+
+    // Rewriting a pre-existing world-readable file re-tightens it to 0600.
+    std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o644)).unwrap();
+    set(&path, "server.port", "9090").unwrap();
+    let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o600, "rewrite must re-tighten to 0600, got {mode:o}");
+
+    // The written key survives the round-trip.
+    let text = std::fs::read_to_string(&path).unwrap();
+    let cfg = resolve(Some(&text), &BTreeMap::new(), &BTreeMap::new()).unwrap();
+    assert_eq!(cfg.server.api_key.expose(), "sk-live-123");
+
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn config_api_key_precedence_flag_over_env_over_file() {
+    // SEC28: --api-key > DRAKKAR_API_KEY > server.api_key in config.
+    let cfg = resolve(Some(FIXTURE), &BTreeMap::new(), &BTreeMap::new()).unwrap();
+    assert_eq!(cfg.server.api_key.expose(), "sk-secret"); // the config-file tier
+
+    // File only wins when nothing else is set.
+    let k0 = resolve_api_key(None, &BTreeMap::new(), &cfg);
+    assert_eq!(k0.expose(), "sk-secret");
+
+    // DRAKKAR_API_KEY overrides the file value.
+    let e = env(&[("DRAKKAR_API_KEY", "env-key")]);
+    let k1 = resolve_api_key(None, &e, &cfg);
+    assert_eq!(k1.expose(), "env-key");
+
+    // --api-key overrides the env var (and the file).
+    let k2 = resolve_api_key(Some("flag-key"), &e, &cfg);
+    assert_eq!(k2.expose(), "flag-key");
+
+    // Unset everywhere → empty secret, not a panic.
+    let empty = Config::default();
+    assert!(
+        resolve_api_key(None, &BTreeMap::new(), &empty)
+            .expose()
+            .is_empty()
+    );
+}
+
+#[test]
+fn config_api_key_never_serializes_in_plaintext_via_debug() {
+    // SEC27: the key is a Secret<String>; its Debug/redacted form hides it.
+    let cfg = resolve(Some(FIXTURE), &BTreeMap::new(), &BTreeMap::new()).unwrap();
+    let debug = format!("{:?}", cfg.server.api_key);
+    assert!(
+        !debug.contains("sk-secret"),
+        "Secret Debug leaked the key: {debug}"
+    );
+}

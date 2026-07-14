@@ -29,3 +29,8 @@ PR (RV30). Dates are ISO 8601.
 ### Fixed
 
 ### Security
+
+- `config.toml` is written mode `0600` (owner-only) on every mutation, via an
+  atomic temp-file + rename, since it may hold `server.api_key` (SEC20). The
+  server API key resolves with the precedence `--api-key` > `DRAKKAR_API_KEY` >
+  `server.api_key` and is held as a redacting `Secret<String>` (SEC28) (#52).
