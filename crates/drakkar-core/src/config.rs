@@ -562,5 +562,97 @@ pub fn set(path: &std::path::Path, key: &str, value: &str) -> Result<(), DkError
     write_atomic_0600(path, &text)
 }
 
+/// The precedence layer a resolved value came from (RFC-0008 CLI10, LD23),
+/// reported by `drakkar config get`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Source {
+    /// A command-line flag.
+    Flag,
+    /// A `DRAKKAR_*` environment variable.
+    Env,
+    /// `config.toml`.
+    File,
+    /// The built-in default.
+    Default,
+}
+
+impl Source {
+    /// The lowercase label used in human and JSON output.
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Source::Flag => "flag",
+            Source::Env => "env",
+            Source::File => "file",
+            Source::Default => "default",
+        }
+    }
+}
+
+/// The typed effective value of one key as a JSON value. `server.api_key` is
+/// redacted (SEC27) — a `get` never renders the secret.
+fn config_value_to_json(cfg: &Config, key: &str) -> serde_json::Value {
+    use serde_json::Value;
+    match key {
+        "server.host" => Value::String(cfg.server.host.clone()),
+        "server.port" => Value::from(cfg.server.port),
+        "server.api_key" => Value::String(crate::secret::REDACTED.to_owned()),
+        "server.hide_reasoning" => Value::Bool(cfg.server.hide_reasoning),
+        "server.responses_api" => Value::Bool(cfg.server.responses_api),
+        "models.default" => Value::String(cfg.models.default.clone()),
+        "storage.path" => Value::String(cfg.storage.path.clone()),
+        "storage.import_hf_cache" => Value::String(
+            match cfg.storage.import_hf_cache {
+                ImportHfCache::Clone => "clone",
+                ImportHfCache::Copy => "copy",
+                ImportHfCache::Off => "off",
+            }
+            .to_owned(),
+        ),
+        "kv_cache.disk" => cfg.kv_cache.disk.map_or(Value::Null, Value::Bool),
+        "kv_cache.bits" => Value::from(cfg.kv_cache.bits),
+        "kv_cache.disk_budget_gib" => Value::from(cfg.kv_cache.disk_budget_gib),
+        "kv_cache.ttl_min" => Value::from(cfg.kv_cache.ttl_min),
+        "runtime.keep_alive" => Value::String(format!("{}s", cfg.runtime.keep_alive.as_secs())),
+        "scheduler.max_concurrency" => Value::from(cfg.scheduler.max_concurrency),
+        "telemetry" => Value::String("off".to_owned()),
+        _ => Value::Null,
+    }
+}
+
+/// Resolve one key's effective value (typed, as JSON) and the precedence
+/// [`Source`] it came from, across the four layers (**flags > env > file >
+/// defaults**). This is the read half of `drakkar config get`.
+///
+/// # Errors
+/// `config.invalid_key` for an unknown key; `config.invalid_value` for an
+/// invalid file/env/flag value.
+pub fn effective(
+    key: &str,
+    file: Option<&str>,
+    env: &BTreeMap<String, String>,
+    flags: &BTreeMap<String, String>,
+) -> Result<(serde_json::Value, Source), DkError> {
+    if key == "schema" || !KNOWN_KEYS.contains(&key) {
+        return Err(invalid_key(key));
+    }
+    let file_map = match file {
+        Some(s) => load_file_map(s)?,
+        None => BTreeMap::new(),
+    };
+    let source = if flags.contains_key(key) {
+        Source::Flag
+    } else if env.contains_key(&env_var_for(key)) {
+        Source::Env
+    } else if file_map.contains_key(key) {
+        Source::File
+    } else {
+        Source::Default
+    };
+    // Resolve the full config so the reported value is the normalized, typed one.
+    let cfg = resolve(file, env, flags)?;
+    Ok((config_value_to_json(&cfg, key), source))
+}
+
 #[cfg(test)]
 mod tests;

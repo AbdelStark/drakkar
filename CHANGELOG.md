@@ -13,6 +13,11 @@ PR (RV30). Dates are ISO 8601.
 
 ### Added
 
+- `drakkar config get|set|path` commands: `get` reports a key's effective value
+  and the precedence layer it came from (flag/env/file/default) with a
+  `drakkar.config/1` `--json` object; `set` validates and writes atomically at
+  `0600`, rejecting unknown keys with exit 2; `path` prints the file location
+  (`server.api_key` is redacted in every `get`) (#110).
 - `drakkar.config/1` configuration library in `drakkar-core`: the `config.toml`
   schema, the four-level precedence resolver (flags > `DRAKKAR_*` env > file >
   defaults), the mechanical env mapping (`server.port` ⇔ `DRAKKAR_SERVER_PORT`),
