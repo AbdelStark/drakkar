@@ -100,6 +100,17 @@ fn no_http_status_literals_outside_the_mapping_module() {
         }
         let text = std::fs::read_to_string(file).unwrap_or_default();
         for (lineno, line) in text.lines().enumerate() {
+            // Test modules are conventionally the trailing `#[cfg(test)] mod`
+            // block; their arbitrary integers (token counts, memory sizes) are
+            // not HTTP statuses, so stop scanning the file at the first one.
+            if line.contains("#[cfg(test)]") {
+                break;
+            }
+            // An explicit escape hatch for a legitimate non-status use of one of
+            // these integers (e.g. a duration in ms).
+            if line.contains("status-scan-allow") {
+                continue;
+            }
             for code in status_literals_in_line(line) {
                 violations.push(format!("{}:{} -> {}", file.display(), lineno + 1, code));
             }
