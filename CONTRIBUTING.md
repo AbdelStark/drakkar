@@ -69,6 +69,19 @@ A PR that weakens one is rejected unless it amends RFC-0001 first and says so:
   names Metal, MLX, or llama.cpp types (enforced by the `cargo deny check bans`
   seam-deps gate and the `cargo public-api` diff).
 
+The layering (DEP1–DEP7) is mechanically enforced. Run the gate locally:
+
+```
+cargo test -p drakkar-core --test dep_direction   # DEP1–DEP6 layer graph (via cargo metadata)
+cargo deny check                                  # seam-deps bans (DEP4/DEP5), licenses, advisories
+```
+
+`dep_direction` reads the live workspace graph and fails on a same-layer edge, a
+backend→engine edge, or `drakkar-core`/`drakkar-mlx-sys` gaining a workspace
+dependency. The `cargo public-api` diff (DEP5: a backend crate re-exporting an
+FFI type) additionally runs in CI once the shim lands and there is a public FFI
+surface to diff; install it with `cargo install cargo-public-api`.
+
 ## Changelog discipline
 
 Every user-visible change lands with its own `[Unreleased]` entry in
